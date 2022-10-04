@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>net.webapp</groupId>
+		<artifactId>rdvmedecins</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>rdvmedecins-front-springmvc-thymeleaf</artifactId>
+	<packaging>war</packaging>
+
+	<name>${project.artifactId}</name>
+	<description>rdvmedecins-front-springmvc-thymeleaf</description>
+
+
+	<properties>
+		<start-class>rdvmedecins.Application</start-class>
+	</properties>
+
+	<dependencies>
+
+		<!-- Module dependency -->
+		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>rdvmedecins-back-core</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+
+		<!-- Spring | WEB -->
+		<!-- Support for full-stack web development, including Tomcat and spring-webmvc -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-tomcat</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- Spring | Thymeleaf -->
+		<!-- Support for the Thymeleaf templating engine, including integration 
+			with Spring -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+
+		<!-- Thymeleaf | additionnal dependencies for layout and security -->
+		<dependency>
+			<groupId>nz.net.ultraq.thymeleaf</groupId>
+			<artifactId>thymeleaf-layout-dialect</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.thymeleaf.extras</groupId>
+			<artifactId>thymeleaf-extras-springsecurity4</artifactId>
+		</dependency>
+
+		<!-- NekoHTML | An HTML parser and tag balancer enables application programmers 
+			to parse HTML documents -->
+		<dependency>
+			<groupId>net.sourceforge.nekohtml</groupId>
+			<artifactId>nekohtml</artifactId>
+		</dependency>
+
+		<!-- include in spring boot web -->
+		<!-- redeclare with provided scope, to deploy in deployable into an external 
+			container -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.springframework.boot</groupId> -->
+		<!-- <artifactId>spring-boot-starter-tomcat</artifactId> -->
+		<!-- <scope>provided</scope> -->
+		<!-- </dependency> -->
+
+	</dependencies>
+
+	<!-- PLUGINS -->
+	<!-- ============================================================================================== -->
+	<build>
+		<defaultGoal>spring-boot:run</defaultGoal>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<!-- remplace references property defined in ressource file (eg . .properties 
+					) by value defined in pom.xml. -->
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.xml</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>**/*.xml</exclude>
+				</excludes>
+			</resource>
+		</resources>
+		<plugins>
+			<!-- MAVEN BOOT Plugin | provides Spring Boot support in Maven, allow 
+				to package executable jar or war archives and run application “in-place” -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<executable>true</executable>
+					<jvmArguments>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005</jvmArguments>
+					<arguments>
+						<argument>--spring.profiles.active=dev</argument>
+					</arguments>
+				</configuration>
+			</plugin>
+
+			<!-- MAVEN ECLIPSE Plugin |used to generate Eclipse IDE files (*.classpath, 
+				*.project, *.wtpmodules and the .settings folder) -->
+			<!-- Retired , no longerIt is no longer maintained -->
+			<!-- use m2e , instead of this plugin -->
+			<!-- <plugin> -->
+			<!-- <groupId>org.apache.maven.plugins</groupId> -->
+			<!-- <artifactId>maven-eclipse-plugin</artifactId> -->
+			<!-- </plugin> -->
+
+			<!-- MAVEN SURFIRE Plugin | is used during the test phase of the build 
+				lifecycle to execute the unit tests of an application -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skipTests>true</skipTests>
+					<testFailureIgnore>true</testFailureIgnore>
+					<argLine>-Xmx256m ${surefireArgLine}</argLine>
+					<runOrder>alphabetical</runOrder>
+				</configuration>
+			</plugin>
+
+			<!-- MAVEN WAR Plugin | responsible for collecting all artifact dependencies, 
+				classes and resources of the web application and packaging them into a web 
+				application archive -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<packagingExcludes>WEB-INF/lib/tomcat-*.jar</packagingExcludes>
+				</configuration>
+			</plugin>
+
+			<!-- MAVEN ENFORCER Plugin | provides goals to control certain environmental 
+				constraints (Maven version, prsence of pplugin version, JDK version and OS 
+				family ..) -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>${maven-enforcer-plugin.version}</version>
+				<configuration>
+					<rules>
+						<requireMavenVersion>
+							<message>You are running an older version of Maven. JHipster
+								requires at least Maven 3.2</message>
+							<version>[3.2.0,)</version>
+						</requireMavenVersion>
+						<requireJavaVersion>
+							<message>You are running an older version of Java. JHipster
+								requires at least JDK ${java.version}</message>
+							<version>[${java.version}.0,)</version>
+						</requireJavaVersion>
+						<requirePluginVersions>
+							<message>Définissez plugin.version !</message>
+						</requirePluginVersions>
+					</rules>
+				</configuration>
+			</plugin>
+
+			<!-- SURFIRE PLUGIN -->
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>2.19</version>
+			</plugin>
+
+			<!-- LIQUIBASE PLUGN | to Generate the database changeLog file -->
+			<plugin>
+				<groupId>org.liquibase</groupId>
+				<artifactId>liquibase-maven-plugin</artifactId>
+				<version>${liquibase.version}</version>
+				<configuration>
+					<!-- Use property file -->
+					<!-- <propertyFileWillOverride>false</propertyFileWillOverride> -->
+					<!-- <propertyFile>src/main/resources/config/liquibase/liquibase.properties</propertyFile> -->
+					<!-- Use Direct property config -->
+					<changeLogFile>src/main/resources/config/liquibase/master.xml</changeLogFile>
+					<driver>com.mysql.jdbc.Driver</driver>
+					<url>jdbc:mysql://localhost:3306/dbrdvmedecins3</url>
+					<defaultSchemaName>dbrdvmedecins3</defaultSchemaName>
+					<username>admin</username>
+					<password>admin</password>
+					<verbose>true</verbose>
+					<logging>debug</logging>
+					<diffChangeLogFile>src/main/resources/config/liquibase/changelog/${maven.build.timestamp}_changelog.xml</diffChangeLogFile>
+					<referenceUrl>hibernate:spring:rdvmedecins.domain?dialect=org.hibernate.dialect.MySQL5InnoDBDialect</referenceUrl>
+				</configuration>
+				<dependencies>
+					<!-- Javassist (JAVA programming ASSISTant) | class library for editing 
+						bytecodes in Java -->
+					<dependency>
+						<groupId>org.javassist</groupId>
+						<artifactId>javassist</artifactId>
+						<version>3.18.2-GA</version>
+					</dependency>
+					<!-- Liquibase extension for hibernate integration including generating 
+						changesets based on changed hibernate mapping files -->
+					<dependency>
+						<groupId>org.liquibase.ext</groupId>
+						<artifactId>liquibase-hibernate4</artifactId>
+						<version>${liquibase-hibernate4.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-starter-data-jpa</artifactId>
+						<version>${spring.boot.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>mysql</groupId>
+						<artifactId>mysql-connector-java</artifactId>
+						<version>5.1.38</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+		</plugins>
+	</build>
+
+	<!-- REPORTING -->
+	<!-- ============================================================================================== -->
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>2.19</version>
+			</plugin>
+		</plugins>
+	</reporting>
+
+	<!-- PROFILEs -->
+	<!-- ============================================================================================== -->
+	<profiles>
+
+		<!-- DEVELLOPEMENT -->
+		<profile>
+			<id>dev</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<!-- ERROR, WARN, INFO and DEBUG are logged -->
+				<logback.loglevel>DEBUG</logback.loglevel>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-tomcat</artifactId>
+				</dependency>
+				<!-- spring DEVTOOLS | provide tools to to improve the development-time. 
+					Provide Livereload and Restart -->
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-devtools</artifactId>
+					<optional>true</optional>
+				</dependency>
+			</dependencies>
+		</profile>
+
+		<!-- FAST -->
+		<profile>
+			<id>fast</id>
+			<!-- <properties> -->
+			<!-- <logback.loglevel>DEBUG</logback.loglevel> -->
+			<!-- </properties> -->
+			<dependencies>
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-undertow</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-devtools</artifactId>
+					<optional>true</optional>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- PRODUCTION -->
+		<profile>
+			<id>prod</id>
+			<!-- <properties> -->
+			<!-- <logback.loglevel>INFO</logback.loglevel> -->
+			<!-- </properties> -->
+			<!-- <dependencies> -->
+			<!-- <dependency> -->
+			<!-- <groupId>org.springframework.boot</groupId> -->
+			<!-- <artifactId>spring-boot-starter-tomcat</artifactId> -->
+			<!-- </dependency> -->
+			<!-- </dependencies> -->
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.trecloux</groupId>
+						<artifactId>yeoman-maven-plugin</artifactId>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-clean-plugin</artifactId>
+					</plugin>
+					<plugin>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+</project>

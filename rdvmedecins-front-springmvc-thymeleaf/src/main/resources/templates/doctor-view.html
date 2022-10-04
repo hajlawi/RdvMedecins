@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="layout">
+
+<head>
+<title th:text="#{medecin.delete.page.title}">Title</title>
+</head>
+
+<body>
+	<div layout:fragment="content">
+
+		<!-- ============================================================================ -->
+		<!-- HEADER -->
+		<!-- ============================================================================ -->
+		<div class="row">
+			<div class="col-lg-12">
+				<h1 class="page-header"
+					th:text="${medecin.civility + '&nbsp;' + medecin.firstName + '&nbsp;' + medecin.lastName}">MEDECINS
+					Name</h1>
+			</div>
+			<!-- /. En col-lg-12 -->
+		</div>
+		<!-- /.row -->
+
+		<!-- ============================================================================ -->
+		<!-- MEDECINS DETAILS VIEW  -->
+		<!-- ============================================================================ -->
+
+		<!-- Button trigger to show Doctor timeslot -->
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="center">
+					<a href="#"
+						th:href="@{/admin/medecins/getAgendaMedecinJour/{idMedecin}/{jour}(idMedecin=${medecin.id},jour=${#calendars.format(today,'yyyy-MM-dd')} )}">
+						<button type="button" class="btn btn-primary">Creneaux</button>
+					</a>
+				</div>
+			</div>
+			<!-- /. En col-lg-12 -->
+		</div>
+		<!-- /# End row -->
+
+		<!-- ============================================================================ -->
+		<!-- MEDECINS TIMESLOT  -->
+		<!-- ============================================================================ -->
+		<div class="row">
+			<div class="col-lg-12">
+
+				<div class="dataTable_wrapper">
+					<table id="dataTables-timeslot"
+						class="table table-striped table-bordered table-hover" width="100%">
+						<thead>
+							<tr class="btn-success">
+								<th>Creneaux Horaire</th>
+								<th>Client</th>
+								<th>Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="element : ${timeslotMap}">
+								<td
+									th:text="${element.key.hdebut + 'h' + element.key.mdebut + '&nbsp;' + ':' + '&nbsp;' + element.key.hfin + 'h' + element.key.mfin}"></td>
+
+								<th:block th:if="${element.value} eq null">
+									<td>Créneaux Libre</td>
+									<td>
+										<form method="GET"
+											th:action="@{/admin/medecins/rv/add/{id}/{jour}(id=${element.key.id}, jour=${#calendars.format(today,'yyyy-MM-dd')} )}"
+											accept-charset="UTF-8" style="display: inline">
+											<button class="btn btn-info btn-xs " type="button" data-toggle="modal"
+												data-target="#modalReservation"
+												data-th-attr="data-title=#{modal.title.reservation}, data-message=${ element.key.hdebut + 'h' + element.key.mdebut + '&nbsp;' + ':' + '&nbsp;' + element.key.hfin + 'h' + element.key.mfin}, data-idcreneau=${element.key.id}, data-jour=${#calendars.format(today,'yyyy-MM-dd')} ">
+												<i class="glyphicon glyphicon-plus"></i> Add
+											</button>
+										</form>
+									</td>
+								</th:block>
+								<th:block th:if="${element.value} neq null">
+									<td
+										th:text="${element.value.client.firstName + '&nbsp;' + element.value.client.lastName }"></td>
+									<td>
+										<a
+											th:href="@{/admin/medecins/{idMedecin}/rv/delete/{idAppointment}/{jour}(idAppointment=${element.value.id}, idMedecin=${medecin.id}, jour=${#calendars.format(today,'yyyy-MM-dd')} )}"><button
+												class="btn btn-danger btn-xs">
+												<i class="glyphicon glyphicon-minus"></i> Cancel
+											</button></a>
+									</td>
+								</th:block>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+			</div>
+			<!-- /. En col-lg-12 -->
+		</div>
+		<!-- /# End row -->
+
+
+		<!-- ============================================================================ -->
+		<!-- Modals -->
+		<!-- ============================================================================ -->
+
+		<!-- include Modal-RegisterPatient -->
+		<div th:replace="fragments/modal-Reservation :: modal-Reservation"></div>
+
+
+	</div>
+	<!-- /# End layout:fragment content -->
+</body>
+</html>
